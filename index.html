@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>駐韓闆闆代購</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --pink:#E75480;--pinkd:#c43565;--pinkl:#fde8ef;
+  --gray:#6b7280;--graybg:#F9FAFB;--graybr:#E5E7EB;
+  --text:#111827;--white:#fff;
+  --r:10px;--rl:14px;--rxl:18px;
+  --shadow:0 2px 8px rgba(0,0,0,.08);
+  --line:#06C755;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Segoe UI',sans-serif;background:#FFF5F8;color:var(--text);min-height:100vh;font-size:14px}
+.hidden{display:none!important}
+button{cursor:pointer;font-family:inherit}
+input,select{font-family:inherit}
+
+/* ── HEADER ── */
+.header{background:linear-gradient(135deg,#E75480 0%,#c43565 100%);color:#fff;text-align:center;padding:18px 16px 14px;box-shadow:0 2px 12px rgba(231,84,128,.35)}
+.header-title{font-size:20px;font-weight:800;letter-spacing:.5px;margin-bottom:2px}
+.header-sub{font-size:12px;opacity:.85;margin-bottom:12px}
+.line-bar{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:24px;padding:7px 16px;cursor:pointer;transition:background .15s}
+.line-bar:hover{background:rgba(255,255,255,.28)}
+.line-id{font-size:13px;font-weight:700;letter-spacing:.3px;color:#fff5f8}
+.copy-tag{font-size:11px;background:var(--line);color:#fff;border-radius:10px;padding:2px 8px;margin-left:4px;font-weight:700}
+.announce-bar{margin:10px auto 0;max-width:520px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:8px 14px;font-size:12px;line-height:1.6;color:#fff5f8;white-space:pre-wrap;text-align:left}
+
+/* ── WRAP ── */
+.page{display:none}
+.page.active{display:block}
+.wrap{max-width:780px;margin:0 auto;padding:14px}
+
+/* ── CAT BAR + SEARCH ── */
+.browse-toolbar{position:sticky;top:0;z-index:70;background:#FFF5F8;padding:10px 14px 0;max-width:780px;margin:0 auto}
+.search-box{position:relative;margin-bottom:10px}
+.search-box input{width:100%;height:38px;border:1.5px solid var(--graybr);border-radius:20px;padding:0 38px 0 14px;font-size:13px;background:var(--white);transition:border-color .15s}
+.search-box input:focus{outline:none;border-color:var(--pink)}
+.search-box svg{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--gray);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--gray);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:12px;display:flex;align-items:center;justify-content:center;line-height:1}
+.cat-bar{display:flex;gap:7px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
+.cat-bar::-webkit-scrollbar{display:none}
+.cat-pill{padding:6px 16px;border-radius:20px;font-size:13px;font-weight:600;background:var(--white);color:var(--gray);border:1.5px solid var(--graybr);white-space:nowrap;flex-shrink:0;transition:all .15s}
+.cat-pill.active{background:var(--pink);color:#fff;border-color:var(--pink)}
+.qk-bar{display:flex;gap:7px;flex-wrap:wrap;padding-bottom:8px}
+.qk-pill{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;background:var(--pinkl);color:var(--pinkd);border:1.5px solid var(--pinkl);white-space:nowrap;transition:all .15s}
+.qk-pill:hover{background:var(--pink);color:#fff;border-color:var(--pink)}
+.qk-pill.active{background:var(--pink);color:#fff;border-color:var(--pink)}
+
+/* ── PRODUCT GRID ── */
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:13px;padding:14px}
+.pcard{background:var(--white);border:1px solid var(--graybr);border-radius:var(--rl);overflow:hidden;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s}
+.pcard:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.pimg-wrap{width:100%;aspect-ratio:1;background:var(--graybg);position:relative;overflow:hidden;cursor:pointer}
+.pimg-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s}
+.pimg-wrap:hover img{transform:scale(1.04)}
+.pimg-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:48px}
+.save-img-btn{position:absolute;bottom:7px;right:7px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:8px;padding:5px 9px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:4px;backdrop-filter:blur(4px);transition:background .15s}
+.save-img-btn:hover{background:rgba(0,0,0,.8)}
+.save-img-btn svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pinfo{padding:11px 11px 13px}
+.pname{font-size:13px;font-weight:700;margin-bottom:3px;line-height:1.35}
+.pcat{font-size:11px;color:var(--gray);margin-bottom:5px}
+.pprice{font-size:15px;font-weight:800;color:var(--pink)}
+.pprice.ask{color:var(--gray);font-size:12px;font-weight:600;background:var(--graybg);display:inline-block;padding:2px 8px;border-radius:6px}
+.pnote{font-size:11px;color:var(--gray);margin-top:4px;line-height:1.4}
+
+/* ── LIGHTBOX ── */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.lb-img-wrap{position:relative;display:flex;align-items:center;justify-content:center;flex:1;width:100%;padding:60px 50px 14px}
+.lb-frame{display:flex;flex-direction:column;width:fit-content;max-width:100%;box-shadow:0 8px 40px rgba(0,0,0,.5);border-radius:var(--r)}
+.lb-img-stack{position:relative;overflow:hidden;display:inline-block;border-radius:var(--r) var(--r) 0 0}
+.lb-img-stack img{max-width:100%;max-height:65vh;display:block;object-fit:contain}
+.lb-img-incoming{position:absolute;inset:0;width:100%;height:100%;transform:translateX(100%)}
+.lb-close{position:absolute;top:14px;right:14px;width:44px;height:44px;background:rgba(255,255,255,.15);border:none;border-radius:50%;color:#fff;font-size:28px;display:flex;align-items:center;justify-content:center;z-index:10}
+.lb-close:hover{background:rgba(255,255,255,.28)}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:56px;height:56px;background:rgba(255,255,255,.18);border:none;border-radius:50%;color:#fff;font-size:32px;display:flex;align-items:center;justify-content:center;z-index:10}
+.lb-nav:hover{background:rgba(255,255,255,.32)}
+.lb-prev{left:8px}
+.lb-next{right:8px}
+.lb-info{background:rgba(0,0,0,.6);backdrop-filter:blur(8px);width:100%;padding:10px 16px;text-align:center;border-radius:0 0 var(--r) var(--r)}
+.lb-name{font-size:19px;font-weight:700;color:#fff;margin-bottom:5px}
+.lb-price{font-size:17px;font-weight:600}
+.lb-price.pink{color:#f9a8c9}
+.lb-price.muted{color:#9ca3af;background:rgba(255,255,255,.1);padding:3px 12px;border-radius:6px;display:inline-block}
+.lb-counter{font-size:11px;color:rgba(255,255,255,.5);margin-top:3px}
+.lb-download{position:absolute;top:14px;left:14px;padding:6px 12px;background:rgba(255,255,255,.15);border:none;border-radius:20px;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px}
+.lb-download:hover{background:rgba(255,255,255,.28)}
+.lb-download svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── ADMIN ENTRY ── */
+.admin-entry{text-align:right;padding-bottom:8px}
+.admin-entry-btn{font-size:11px;color:var(--gray);background:transparent;border:1px solid var(--graybr);border-radius:20px;padding:4px 12px}
+
+/* ── LOGIN ── */
+.login-wrap{min-height:calc(100vh - 120px);display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{background:var(--white);border-radius:var(--rl);padding:32px 26px;width:300px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.1)}
+.pw-input{width:100%;height:42px;border:1.5px solid var(--graybr);border-radius:var(--r);padding:0 14px;font-size:16px;letter-spacing:5px;text-align:center;margin-bottom:12px;transition:border-color .15s}
+.pw-input:focus{outline:none;border-color:var(--pink)}
+.login-btn{width:100%;padding:12px;background:var(--pink);color:#fff;border:none;border-radius:var(--r);font-size:15px;font-weight:700}
+.login-btn:hover{background:var(--pinkd)}
+
+/* ── ADMIN TABS ── */
+.admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.atabs{display:flex;gap:6px;flex-wrap:wrap}
+.atab{padding:7px 15px;border:1.5px solid var(--graybr);border-radius:20px;font-size:13px;font-weight:600;background:var(--white);color:var(--gray)}
+.atab.active{background:var(--pink);color:#fff;border-color:var(--pink)}
+.logout-btn{font-size:12px;color:var(--gray);background:transparent;border:1px solid var(--graybr);border-radius:20px;padding:5px 12px}
+.logout-btn:hover{background:var(--graybg)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 15px;border-radius:var(--r);font-size:13px;font-weight:700;border:none;transition:all .15s;white-space:nowrap}
+.btn-pink{background:var(--pink);color:#fff}.btn-pink:hover{background:var(--pinkd)}
+.btn-outline{background:transparent;color:var(--gray);border:1.5px solid var(--graybr)}.btn-outline:hover{background:var(--graybg)}
+.btn-red{background:#dc2626;color:#fff}.btn-red:hover{background:#b91c1c}
+.btn-sm{padding:5px 11px;font-size:12px}
+
+/* ── PRODUCT MGMT ── */
+.top-actions{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.section-title{font-size:15px;font-weight:700}
+.pmcard{background:var(--white);border:1px solid var(--graybr);border-radius:var(--rl);padding:11px 13px;margin-bottom:8px;display:flex;align-items:center;gap:11px;box-shadow:var(--shadow)}
+.pmcard.offline{opacity:.5}
+.pmcheck{width:18px;height:18px;flex-shrink:0;cursor:pointer;accent-color:var(--pink)}
+.pmthumb{width:74px;height:74px;border-radius:var(--r);background:var(--graybg);display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;flex-shrink:0}
+.pmthumb img{width:100%;height:100%;object-fit:cover}
+.pminfo{flex:1;min-width:0}
+.pmname{font-size:13px;font-weight:700}
+.pmsub{font-size:11px;color:var(--gray);margin-top:2px}
+.pm-actions{display:flex;gap:4px;flex-shrink:0}
+.icon-btn{width:30px;height:30px;border:1px solid var(--graybr);border-radius:var(--r);background:transparent;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--gray)}
+.icon-btn:hover{background:var(--graybg)}
+.icon-btn.del:hover{background:#FEF2F2;color:#dc2626;border-color:#FECACA}
+.tag{font-size:10px;padding:1px 7px;border-radius:8px;font-weight:700;margin-left:5px}
+.tag-off{background:var(--graybg);color:var(--gray)}
+
+/* ── BATCH BAR ── */
+.batch-bar{background:var(--pink);color:#fff;border-radius:var(--r);padding:10px 13px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.batch-bar .bbtn{padding:4px 10px;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,.35);border-radius:6px;background:rgba(255,255,255,.15);color:#fff}
+.batch-bar .bbtn:hover{background:rgba(255,255,255,.3)}
+.batch-bar .bbtn.danger{background:rgba(220,38,38,.45);border-color:rgba(220,38,38,.5)}
+.batch-cat-row{display:flex;gap:6px;align-items:center;width:100%;padding-top:8px;border-top:1px solid rgba(255,255,255,.2)}
+.batch-cat-row select{flex:1;height:32px;border:1px solid rgba(255,255,255,.4);border-radius:6px;padding:0 8px;font-size:12px;background:rgba(255,255,255,.15);color:#fff}
+.batch-cat-row select option{color:var(--text);background:#fff}
+
+/* ── FILTER ROW ── */
+.filter-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.filter-row select,.filter-row input{height:34px;border:1.5px solid var(--graybr);border-radius:var(--r);padding:0 10px;font-size:12px;background:var(--white);flex:1;min-width:110px}
+
+/* ── CAT LIST ── */
+.store-card{background:var(--white);border:1px solid var(--graybr);border-radius:var(--rl);padding:13px 15px;margin-bottom:8px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)}
+.store-icon{font-size:28px}
+.store-info{flex:1}
+.store-name{font-size:14px;font-weight:700}
+.store-sub{font-size:12px;color:var(--gray);margin-top:2px}
+
+/* ── FORM ── */
+.foverlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:14px}
+.fcard{background:var(--white);border-radius:var(--rl);width:100%;max-width:420px;padding:22px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.frow{margin-bottom:13px}
+.frow label{display:block;font-size:11px;font-weight:700;color:var(--gray);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+.finput{width:100%;height:38px;border:1.5px solid var(--graybr);border-radius:var(--r);padding:0 11px;font-size:14px;transition:border-color .15s;background:var(--white)}
+.finput:focus{outline:none;border-color:var(--pink)}
+.fbtns{display:flex;gap:8px;margin-top:16px}
+.fbtns .btn{flex:1;justify-content:center;padding:11px}
+.sheet-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sheet-title{font-size:16px;font-weight:800}
+.xbtn{width:30px;height:30px;border:1px solid var(--graybr);border-radius:50%;background:transparent;font-size:18px;display:flex;align-items:center;justify-content:center;color:var(--gray)}
+
+/* ── IMG UPLOAD (multi) ── */
+.img-add-btn{border:2px dashed var(--graybr);border-radius:var(--r);padding:14px;text-align:center;cursor:pointer;background:var(--graybg);transition:all .15s;margin-bottom:8px}
+.img-add-btn:hover{border-color:var(--pink);background:var(--pinkl)}
+.media-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:8px}
+.media-thumb{position:relative;aspect-ratio:1;border-radius:var(--r);overflow:hidden;background:var(--graybg);border:1.5px solid var(--graybr)}
+.media-thumb img,.media-thumb video{width:100%;height:100%;object-fit:cover;display:block}
+.media-thumb .rm-btn{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;border:none;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.media-thumb .mv-btn{position:absolute;bottom:3px;left:3px;width:20px;height:20px;border-radius:5px;background:rgba(0,0,0,.55);color:#fff;border:none;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.media-thumb .mv-btn:disabled{opacity:.3;cursor:default}
+.media-thumb .badge{position:absolute;bottom:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;border-radius:4px;padding:1px 5px}
+/* product card media count badge */
+.pimg-count{position:absolute;top:7px;left:7px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;font-weight:700;border-radius:8px;padding:2px 7px;backdrop-filter:blur(3px)}
+/* lightbox media tabs */
+.lb-dots{display:flex;gap:5px;justify-content:center;padding:6px 10px 4px;flex-wrap:wrap}
+.lb-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);border:none;cursor:pointer;padding:0;transition:background .15s;flex-shrink:0}
+.lb-dot.active{background:#fff}
+.lb-video{max-width:100%;max-height:65vh;display:block;object-fit:contain;border-radius:var(--r) var(--r) 0 0}
+
+/* ── TOGGLE ── */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--graybg);margin-top:4px}
+.tw{position:relative;width:44px;height:24px;flex-shrink:0}
+.tw input{opacity:0;width:0;height:0;position:absolute}
+.tsl{position:absolute;inset:0;background:var(--graybr);border-radius:12px;transition:background .2s;cursor:pointer}
+.tw input:checked+.tsl{background:var(--pink)}
+.tsl:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tw input:checked+.tsl:before{transform:translateX(20px)}
+
+/* ── MISC ── */
+.empty{text-align:center;padding:50px 20px;color:var(--gray);font-size:14px}
+.loading{text-align:center;padding:50px 20px;color:var(--gray)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:10px 22px;border-radius:24px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="header">
+  <div class="header-title">🇰🇷 駐韓闆闆代購</div>
+  <div class="header-sub">韓國直送 · 精選好物</div>
+  <div style="display:flex;justify-content:center">
+    <a class="line-bar" href="https://line.me/R/ti/p/@088fleod" target="_blank" rel="noopener" style="text-decoration:none">
+      <svg style="width:20px;height:20px;flex-shrink:0" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2C6.48 2 2 6.03 2 11.05c0 3.1 1.74 5.85 4.41 7.56l-.56 2.06a.5.5 0 00.71.57L9.3 19.7C10.17 19.9 11.08 20 12 20c5.52 0 10-4.03 10-8.95C22 6.03 17.52 2 12 2z" fill="white"/>
+      </svg>
+      <span class="line-id">官方 LINE：@088fleod</span>
+      <span class="copy-tag">加入好友</span>
+    </a>
+  </div>
+  <div class="announce-bar hidden" id="announce-bar"></div>
+</div>
+
+<!-- ════ 商品瀏覽 ════ -->
+<div class="page active" id="pg-browse">
+  <div class="browse-toolbar">
+    <div class="admin-entry" id="admin-entry">
+      <button class="admin-entry-btn" onclick="showAdminPage()">管理員入口</button>
+    </div>
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="🔍 搜尋商品名稱…" oninput="onSearch()" />
+      <button class="search-clear hidden" id="search-clear" onclick="clearSearch()">×</button>
+    </div>
+    <div class="qk-bar" id="qk-bar"></div>
+    <div class="cat-bar" id="cat-bar"></div>
+  </div>
+  <div class="product-grid" id="product-grid"><div class="loading">✨ 商品載入中…</div></div>
+</div>
+
+<!-- ════ 後台 ════ -->
+<div class="page" id="pg-admin">
+  <div class="login-wrap" id="login-wrap">
+    <div class="login-card">
+      <div style="font-size:40px;margin-bottom:14px">🔐</div>
+      <div style="font-size:18px;font-weight:800;margin-bottom:4px">後台管理</div>
+      <div style="font-size:13px;color:var(--gray);margin-bottom:20px">請輸入管理密碼</div>
+      <input class="pw-input" type="password" id="pw" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <button class="login-btn" onclick="doLogin()">登入</button>
+      <div style="font-size:12px;color:#dc2626;margin-top:9px;min-height:16px" id="pw-err"></div>
+      <div style="margin-top:16px">
+        <button class="btn-outline btn btn-sm" onclick="showBrowsePage()">← 返回商品瀏覽</button>
+      </div>
+    </div>
+  </div>
+  <div class="hidden" id="admin-content">
+    <div class="wrap">
+      <div class="admin-header">
+        <div class="atabs">
+          <button class="atab active" onclick="switchAdmin('products')">🛍️ 商品管理</button>
+          <button class="atab" onclick="switchAdmin('categories')">🏷️ 分類管理</button>
+          <button class="atab" onclick="switchAdmin('qk')">🔑 快速關鍵字</button>
+          <button class="atab" onclick="switchAdmin('settings')">📢 公告設定</button>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline btn-sm" onclick="showBrowsePage()">← 前台</button>
+          <button class="logout-btn" onclick="doLogout()">登出</button>
+        </div>
+      </div>
+
+      <!-- 商品管理 -->
+      <div id="ap-products">
+        <div class="top-actions">
+          <span class="section-title">商品列表</span>
+          <button class="btn btn-pink btn-sm" onclick="openPForm(null)">＋ 新增商品</button>
+        </div>
+        <!-- 批次操作列 -->
+        <div class="batch-bar hidden" id="batch-bar">
+          <div style="display:flex;align-items:center;justify-content:space-between;width:100%;flex-wrap:wrap;gap:6px">
+            <span id="batch-count" style="font-weight:700">已選 0 筆</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="bbtn" onclick="batchSelectAll()">全選</button>
+              <button class="bbtn" onclick="batchDeselectAll()">取消全選</button>
+              <button class="bbtn" onclick="batchOnline(true)">上架</button>
+              <button class="bbtn" onclick="batchOnline(false)">下架</button>
+              <button class="bbtn danger" onclick="batchDelete()">刪除</button>
+            </div>
+          </div>
+          <!-- 批次修改分類 -->
+          <div class="batch-cat-row">
+            <span style="font-size:12px;white-space:nowrap">批次改分類：</span>
+            <select id="batch-cat-select">
+              <option value="">不分類</option>
+            </select>
+            <button class="bbtn" onclick="batchChangeCat()">套用</button>
+          </div>
+        </div>
+        <!-- 篩選列 -->
+        <div class="filter-row">
+          <input type="text" id="pm-search" placeholder="🔍 搜尋商品名稱…" oninput="renderPmgmt()" style="flex:2;min-width:140px"/>
+          <select id="pm-filter-cat" onchange="renderPmgmt()">
+            <option value="">所有分類</option>
+          </select>
+          <select id="pm-filter-status" onchange="renderPmgmt()">
+            <option value="">全部狀態</option>
+            <option value="1">上架中</option>
+            <option value="0">已下架</option>
+          </select>
+        </div>
+        <div id="pmgmt-list"><div class="loading">載入中…</div></div>
+      </div>
+
+      <!-- 分類管理 -->
+      <div class="hidden" id="ap-categories">
+        <div class="top-actions">
+          <span class="section-title">商品分類</span>
+          <button class="btn btn-pink btn-sm" onclick="openCatForm(null)">＋ 新增分類</button>
+        </div>
+        <div id="cat-list"><div class="loading">載入中…</div></div>
+      </div>
+
+      <!-- 快速關鍵字管理 -->
+      <div class="hidden" id="ap-qk">
+        <div class="top-actions">
+          <span class="section-title">快速關鍵字</span>
+          <button class="btn btn-pink btn-sm" onclick="openQkForm(null)">＋ 新增關鍵字</button>
+        </div>
+        <div style="font-size:12px;color:var(--gray);margin-bottom:10px">這裡設定的按鈕會顯示在前台搜尋框下方，點擊後會直接帶入該關鍵字搜尋商品。</div>
+        <div id="qk-list"><div class="loading">載入中…</div></div>
+      </div>
+
+      <!-- 公告設定 -->
+      <div class="hidden" id="ap-settings">
+        <div class="top-actions">
+          <span class="section-title">公告資訊</span>
+        </div>
+        <div style="font-size:12px;color:var(--gray);margin-bottom:10px">內容會顯示在前台官方 LINE 下方，留空則不顯示。</div>
+        <div class="frow">
+          <textarea class="finput" id="announce-input" rows="4" style="height:auto;padding:10px 11px;resize:vertical" placeholder="例：📦 出貨通知：每週二、五截單，預計 7-10 個工作日到貨～"></textarea>
+        </div>
+        <button class="btn btn-pink" onclick="saveAnnouncement()">儲存公告</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ 燈箱 ════ -->
+<div class="lightbox hidden" id="lightbox">
+  <button class="lb-close" onclick="closeLightbox()">×</button>
+  <button class="lb-download" id="lb-dl-btn" onclick="downloadCurrent()">
+    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    儲存圖片
+  </button>
+  <div class="lb-img-wrap">
+    <button class="lb-nav lb-prev" onclick="lbNav(-1)">‹</button>
+    <div class="lb-frame">
+      <div class="lb-img-stack" id="lb-img-stack">
+        <img id="lb-img" src="" alt="商品圖片"/>
+        <img id="lb-img-2" class="lb-img-incoming" src="" alt=""/>
+        <video id="lb-video" class="lb-video hidden" controls playsinline></video>
+      </div>
+      <div class="lb-dots" id="lb-dots"></div>
+      <div class="lb-info">
+        <div class="lb-name" id="lb-name"></div>
+        <div id="lb-price"></div>
+        <div class="lb-counter" id="lb-counter"></div>
+      </div>
+    </div>
+    <button class="lb-nav lb-next" onclick="lbNav(1)">›</button>
+  </div>
+</div>
+
+<!-- 商品表單 -->
+<div class="foverlay hidden" id="pform-ov" onclick="if(event.target===this)closePForm()">
+  <div class="fcard" onclick="event.stopPropagation()">
+    <div class="sheet-hd">
+      <span class="sheet-title" id="pform-title">新增商品</span>
+      <button class="xbtn" onclick="closePForm()">×</button>
+    </div>
+    <div class="frow"><label>商品名稱 *</label><input type="text" class="finput" id="f-name" placeholder="例：韓國蒸米糕"/></div>
+    <div class="frow">
+      <label>售價（選填，空白顯示「詢問闆娘」）</label>
+      <input type="number" class="finput" id="f-price" placeholder="留空則顯示詢問闆娘"/>
+    </div>
+    <div class="frow">
+      <label>商品分類</label>
+      <select class="finput" id="f-cat"><option value="">不分類</option></select>
+    </div>
+    <div class="frow">
+      <label>商品圖片／影片（可多張）</label>
+      <div class="media-grid" id="media-grid"></div>
+      <div class="img-add-btn" id="img-add-btn" onclick="document.getElementById('img-file').click()">
+        <div style="font-size:28px;margin-bottom:5px">📷＋</div>
+        <div style="font-size:12px;color:var(--gray)">點擊新增圖片或影片</div>
+        <div style="font-size:11px;color:var(--gray);margin-top:3px">JPG · PNG · WEBP · MP4 · MOV</div>
+      </div>
+      <input type="file" id="img-file" accept="image/*,video/*" multiple style="display:none" onchange="handleMedia(event)"/>
+    </div>
+    <div class="frow"><label>備註說明（選填）</label><input type="text" class="finput" id="f-note" placeholder="例：口味、克重、產地…"/></div>
+    <div class="toggle-row">
+      <div>
+        <div style="font-size:13px;font-weight:700">立即上架</div>
+        <div style="font-size:11px;color:var(--gray);margin-top:2px">關閉則不顯示給瀏覽者</div>
+      </div>
+      <label class="tw"><input type="checkbox" id="f-online" checked/><span class="tsl"></span></label>
+    </div>
+    <div class="fbtns">
+      <button class="btn btn-outline" onclick="closePForm()">取消</button>
+      <button class="btn btn-pink" onclick="saveProduct()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 分類表單 -->
+<div class="foverlay hidden" id="cform-ov" onclick="if(event.target===this)closeCatForm()">
+  <div class="fcard" style="max-width:340px" onclick="event.stopPropagation()">
+    <div class="sheet-hd">
+      <span class="sheet-title" id="cform-title">新增分類</span>
+      <button class="xbtn" onclick="closeCatForm()">×</button>
+    </div>
+    <div class="frow"><label>分類名稱 *</label><input type="text" class="finput" id="cf-name" placeholder="例：韓國零食"/></div>
+    <div class="frow"><label>Emoji 圖示（選填）</label><input type="text" class="finput" id="cf-emoji" placeholder="例：🍡" maxlength="4"/></div>
+    <div class="fbtns">
+      <button class="btn btn-outline" onclick="closeCatForm()">取消</button>
+      <button class="btn btn-pink" onclick="saveCat()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 快速關鍵字表單 -->
+<div class="foverlay hidden" id="qform-ov" onclick="if(event.target===this)closeQkForm()">
+  <div class="fcard" style="max-width:340px" onclick="event.stopPropagation()">
+    <div class="sheet-hd">
+      <span class="sheet-title" id="qform-title">新增關鍵字</span>
+      <button class="xbtn" onclick="closeQkForm()">×</button>
+    </div>
+    <div class="frow"><label>按鈕顯示文字 *</label><input type="text" class="finput" id="qf-label" placeholder="例：🍜 泡麵"/></div>
+    <div class="frow"><label>搜尋關鍵字 *</label><input type="text" class="finput" id="qf-keyword" placeholder="例：泡麵"/></div>
+    <div class="fbtns">
+      <button class="btn btn-outline" onclick="closeQkForm()">取消</button>
+      <button class="btn btn-pink" onclick="saveQk()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SB=supabase.createClient(
+  'https://zhswnvooebxpubjnaedc.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpoc3dudm9vZWJ4cHViam5hZWRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MTMxNjQsImV4cCI6MjA5Njk4OTE2NH0.6G3-oSaBv833kC-vvRzApkisfQWiHktaYOEDfM-2aeY'
+);
+const ADMIN_PW='ling888';
+
+let categories=[];
+let products=[];
+let quickKeywords=[];
+let announceText='';
+let adminUnlocked=false;
+let editingPid=null;
+let editingCid=null;
+let editingQid=null;
+let pendingMediaList=[];  // [{type:'image'|'video', data:dataURL, mime:str}]
+let selectedPids=new Set();
+let currentCat='all';
+let searchKeyword='';
+// 燈箱狀態（單一商品多媒體）
+let lbMedia=[];   // [{type,data}] 目前商品的媒體
+let lbIndex=0;   // 目前媒體 index
+
+/* ── Toast ── */
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+/* ── 頁面切換 ── */
+function showBrowsePage(){
+  document.getElementById('pg-browse').classList.add('active');
+  document.getElementById('pg-admin').classList.remove('active');
+}
+function showAdminPage(){
+  document.getElementById('pg-browse').classList.remove('active');
+  document.getElementById('pg-admin').classList.add('active');
+}
+function doLogout(){
+  adminUnlocked=false;
+  document.getElementById('admin-content').classList.add('hidden');
+  document.getElementById('login-wrap').classList.remove('hidden');
+  document.getElementById('pw').value='';
+  showBrowsePage();
+}
+function switchAdmin(tab){
+  document.querySelectorAll('.atab').forEach((b,i)=>b.classList.toggle('active',['products','categories','qk','settings'][i]===tab));
+  document.getElementById('ap-products').classList.toggle('hidden',tab!=='products');
+  document.getElementById('ap-categories').classList.toggle('hidden',tab!=='categories');
+  document.getElementById('ap-qk').classList.toggle('hidden',tab!=='qk');
+  document.getElementById('ap-settings').classList.toggle('hidden',tab!=='settings');
+  if(tab==='categories')renderCatList();
+  if(tab==='products')renderPmgmt();
+  if(tab==='qk')renderQkList();
+  if(tab==='settings')document.getElementById('announce-input').value=announceText;
+}
+
+/* ── Load ── */
+async function loadCategories(){
+  const{data,error}=await SB.from('categories').select('*').order('id');
+  if(error){toast('分類載入失敗');return;}
+  categories=data||[];
+  refreshCatSelects();
+}
+async function loadProducts(){
+  const{data,error}=await SB.from('browse_products').select('*').order('id');
+  if(error){toast('商品載入失敗');return;}
+  products=(data||[]).map(p=>{
+    // 向後相容：img_data 可能是舊的單張 base64 字串，也可能是新的 JSON 陣列
+    let media=[];
+    if(p.img_data){
+      try{
+        const parsed=JSON.parse(p.img_data);
+        if(Array.isArray(parsed))media=parsed;
+        else media=[{type:'image',data:p.img_data}];
+      }catch{
+        media=[{type:'image',data:p.img_data}];
+      }
+    }
+    return{id:p.id,name:p.name,price:p.price,catId:p.cat_id,note:p.note||'',media,online:p.online!==false};
+  });
+  renderCatBar();renderProducts();
+  if(adminUnlocked)renderPmgmt();
+}
+async function loadQuickKeywords(){
+  const{data,error}=await SB.from('quick_keywords').select('*').order('id');
+  if(error){quickKeywords=[];renderQkBar();return;}
+  quickKeywords=data||[];
+  renderQkBar();
+  if(adminUnlocked)renderQkList();
+}
+async function loadAnnouncement(){
+  const{data,error}=await SB.from('site_settings').select('value').eq('key','announcement').maybeSingle();
+  if(error){announceText='';renderAnnouncement();return;}
+  announceText=data?.value||'';
+  renderAnnouncement();
+}
+function renderAnnouncement(){
+  const el=document.getElementById('announce-bar');
+  if(!el)return;
+  if(announceText.trim()){
+    el.textContent=announceText;
+    el.classList.remove('hidden');
+  }else{
+    el.classList.add('hidden');
+  }
+}
+
+function getCat(id){return categories.find(c=>String(c.id)===String(id))||null;}
+function getProd(id){return products.find(p=>p.id===id)||null;}
+
+function refreshCatSelects(){
+  const opts='<option value="">不分類</option>'+categories.map(c=>`<option value="${c.id}">${c.emoji||''}${c.name}</option>`).join('');
+  document.getElementById('f-cat').innerHTML=opts;
+  const pf=document.getElementById('pm-filter-cat');
+  pf.innerHTML='<option value="">所有分類</option>'+categories.map(c=>`<option value="${c.id}">${c.emoji||''}${c.name}</option>`).join('');
+  const bs=document.getElementById('batch-cat-select');
+  bs.innerHTML='<option value="">不分類</option>'+categories.map(c=>`<option value="${c.id}">${c.emoji||''}${c.name}</option>`).join('');
+  renderCatBar();
+  if(adminUnlocked)renderCatList();
+}
+
+/* ── 搜尋 ── */
+function onSearch(){
+  searchKeyword=document.getElementById('search-input').value.trim();
+  document.getElementById('search-clear').classList.toggle('hidden',!searchKeyword);
+  renderProducts();renderQkBar();
+}
+function clearSearch(){
+  document.getElementById('search-input').value='';
+  searchKeyword='';
+  document.getElementById('search-clear').classList.add('hidden');
+  renderProducts();renderQkBar();
+}
+
+/* ── 快速關鍵字 Bar ── */
+function renderQkBar(){
+  const bar=document.getElementById('qk-bar');
+  if(!bar)return;
+  if(!quickKeywords.length){bar.innerHTML='';return;}
+  bar.innerHTML=quickKeywords.map(k=>`<button class="qk-pill${searchKeyword&&searchKeyword===k.keyword?' active':''}" onclick="applyQk('${k.keyword.replace(/'/g,"\\'")}')">${k.label}</button>`).join('');
+}
+function applyQk(keyword){
+  if(searchKeyword===keyword){
+    clearSearch();return;
+  }
+  document.getElementById('search-input').value=keyword;
+  searchKeyword=keyword;
+  document.getElementById('search-clear').classList.remove('hidden');
+  renderProducts();renderQkBar();
+}
+
+/* ── 分類 Bar ── */
+function renderCatBar(){
+  const bar=document.getElementById('cat-bar');
+  const activeCats=categories.filter(c=>products.some(p=>p.online&&String(p.catId)===String(c.id)));
+  let pills=`<button class="cat-pill${currentCat==='all'?' active':''}" onclick="setCat('all')">全部</button>`;
+  pills+=activeCats.map(c=>`<button class="cat-pill${currentCat===String(c.id)?' active':''}" onclick="setCat('${c.id}')">${c.emoji||''}${c.name}</button>`).join('');
+  bar.innerHTML=pills;
+}
+function setCat(id){currentCat=id;renderCatBar();renderProducts();}
+
+/* ── 商品瀏覽 ── */
+function filteredProducts(){
+  return products.filter(p=>{
+    if(!p.online)return false;
+    if(currentCat!=='all'&&String(p.catId)!==String(currentCat))return false;
+    if(searchKeyword&&!p.name.toLowerCase().includes(searchKeyword.toLowerCase()))return false;
+    return true;
+  });
+}
+
+function renderProducts(){
+  const g=document.getElementById('product-grid');
+  const vp=filteredProducts();
+  if(!vp.length){
+    g.innerHTML=`<div class="empty">${searchKeyword?'🔍 找不到符合的商品':'✨ 商品即將上架，敬請期待！'}</div>`;
+    return;
+  }
+  g.innerHTML=vp.map((p,idx)=>{
+    const cat=getCat(p.catId);
+    const priceHtml=p.price
+      ?`<div class="pprice">NT$ ${Number(p.price).toLocaleString()}</div>`
+      :`<div class="pprice ask">💬 詢問闆娘</div>`;
+    const firstMedia=p.media&&p.media.length?p.media[0]:null;
+    let imgContent;
+    if(firstMedia){
+      if(firstMedia.type==='video'){
+        imgContent=`<video src="${firstMedia.data}" onclick="openLightbox(${idx})" style="width:100%;height:100%;object-fit:cover;display:block;cursor:pointer" muted playsinline></video>`;
+      }else{
+        imgContent=`<img src="${firstMedia.data}" alt="${p.name}" onclick="openLightbox(${idx})" loading="lazy"/>`;
+      }
+    }else{
+      imgContent=`<div class="pimg-placeholder">🛍️</div>`;
+    }
+    const countBadge=(p.media&&p.media.length>1)?`<div class="pimg-count">1 / ${p.media.length}</div>`:'';
+    const saveBtn=firstMedia&&firstMedia.type==='image'
+      ?`<button class="save-img-btn" onclick="event.stopPropagation();downloadImage(${p.id})" title="儲存圖片">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          儲存
+        </button>`:''
+    return`<div class="pcard">
+      <div class="pimg-wrap">${imgContent}${countBadge}${saveBtn}</div>
+      <div class="pinfo">
+        ${cat?`<div class="pcat">${cat.emoji||''}${cat.name}</div>`:''}
+        <div class="pname">${p.name}</div>
+        ${priceHtml}
+        ${p.note?`<div class="pnote">${p.note}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── 儲存圖片 ── */
+function dataURLtoBlob(dataurl){
+  const arr=dataurl.split(',');
+  const mimeMatch=arr[0].match(/:(.*?);/);
+  const mime=mimeMatch?mimeMatch[1]:'image/jpeg';
+  const bstr=atob(arr[1]);
+  let n=bstr.length;
+  const u8arr=new Uint8Array(n);
+  while(n--){u8arr[n]=bstr.charCodeAt(n);}
+  return new Blob([u8arr],{type:mime});
+}
+function fallbackSave(imgData,filename){
+  const win=window.open();
+  if(win){
+    win.document.write(`<title>${filename}</title><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="${imgData}" style="max-width:100%;max-height:100vh"/></body>`);
+    toast('📷 請長按圖片選擇「儲存到相簿」');
+  }else{
+    const a=document.createElement('a');
+    a.href=imgData;a.download=filename;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    toast('⬇️ 圖片儲存中！');
+  }
+}
+function saveImageToAlbum(imgData,filename){
+  // 全程同步處理（避免 await 導致失去使用者操作權限，造成分享/開新視窗失效）
+  let file=null;
+  try{
+    const blob=dataURLtoBlob(imgData);
+    file=new File([blob],filename,{type:blob.type||'image/jpeg'});
+  }catch(e){}
+  if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file],title:filename}).catch(err=>{
+      if(err&&err.name==='AbortError')return;
+      fallbackSave(imgData,filename);
+    });
+    return;
+  }
+  fallbackSave(imgData,filename);
+}
+function downloadImage(pid){
+  const p=getProd(pid);
+  const img=p&&p.media&&p.media.find(m=>m.type==='image');
+  if(!img){toast('此商品無圖片');return;}
+  saveImageToAlbum(img.data,p.name+'.jpg');
+}
+
+/* ── 燈箱（單商品多媒體）── */
+let _lbProduct=null;
+
+function openLightbox(idx){
+  const vp=filteredProducts();
+  _lbProduct=vp[idx];
+  if(!_lbProduct||!_lbProduct.media||!_lbProduct.media.length)return;
+  lbMedia=_lbProduct.media;
+  lbIndex=0;
+  const img1=document.getElementById('lb-img');
+  const img2=document.getElementById('lb-img-2');
+  img1.style.transition='none';img2.style.transition='none';
+  img1.style.transform='translateX(0)';img2.style.transform='translateX(100%)';
+  renderLightbox();
+  document.getElementById('lightbox').classList.remove('hidden');
+}
+function closeLightbox(){
+  const vid=document.getElementById('lb-video');
+  vid.pause();vid.src='';
+  document.getElementById('lightbox').classList.add('hidden');
+}
+function lbNav(dir){
+  if(lbMedia.length<2)return;
+  const nextIdx=(lbIndex+dir+lbMedia.length)%lbMedia.length;
+  const nextM=lbMedia[nextIdx];
+  // 若目前是圖，下一個也是圖，做滑動動畫
+  const curM=lbMedia[lbIndex];
+  if(curM.type==='image'&&nextM.type==='image'){
+    const img1=document.getElementById('lb-img');
+    const img2=document.getElementById('lb-img-2');
+    img2.src=nextM.data;
+    img1.style.transition='none';img2.style.transition='none';
+    img1.style.transform='translateX(0)';
+    img2.style.transform=`translateX(${dir>0?'100%':'-100%'})`;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      img1.style.transition='transform .26s ease';img2.style.transition='transform .26s ease';
+      img1.style.transform=`translateX(${dir>0?'-100%':'100%'})`;
+      img2.style.transform='translateX(0)';
+    }));
+    setTimeout(()=>{
+      lbIndex=nextIdx;renderLightbox();
+      img1.style.transition='none';img2.style.transition='none';
+      img1.style.transform='translateX(0)';img2.style.transform='translateX(100%)';
+    },260);
+  }else{
+    lbIndex=nextIdx;renderLightbox();
+  }
+}
+function lbGoTo(idx){
+  lbIndex=idx;renderLightbox();
+}
+function renderLightbox(){
+  if(!lbMedia.length||!_lbProduct)return;
+  const m=lbMedia[lbIndex];
+  const img1=document.getElementById('lb-img');
+  const img2=document.getElementById('lb-img-2');
+  const vid=document.getElementById('lb-video');
+  if(m.type==='video'){
+    img1.classList.add('hidden');img2.classList.add('hidden');
+    vid.classList.remove('hidden');
+    vid.src=m.data;vid.load();
+    document.getElementById('lb-dl-btn').style.display='none';
+  }else{
+    vid.pause();vid.src='';
+    vid.classList.add('hidden');
+    img1.classList.remove('hidden');
+    // img2 stays hidden until animation
+    img1.src=m.data;
+    document.getElementById('lb-dl-btn').style.display='';
+  }
+  // info
+  document.getElementById('lb-name').textContent=_lbProduct.name;
+  const priceEl=document.getElementById('lb-price');
+  if(_lbProduct.price){priceEl.className='lb-price pink';priceEl.textContent='NT$ '+Number(_lbProduct.price).toLocaleString();}
+  else{priceEl.className='lb-price muted';priceEl.textContent='💬 詢問闆娘';}
+  document.getElementById('lb-counter').textContent=`${lbIndex+1} / ${lbMedia.length}`;
+  // dots
+  const dotsEl=document.getElementById('lb-dots');
+  if(lbMedia.length>1){
+    dotsEl.innerHTML=lbMedia.map((mm,i)=>`<button class="lb-dot${i===lbIndex?' active':''}" onclick="lbGoTo(${i})" title="${mm.type==='video'?'▶ 影片':'圖片 '+(i+1)}"></button>`).join('');
+    dotsEl.style.display='';
+  }else{dotsEl.innerHTML='';dotsEl.style.display='none';}
+  // nav arrows
+  const showNav=lbMedia.length>1;
+  document.querySelector('.lb-prev').style.display=showNav?'':'none';
+  document.querySelector('.lb-next').style.display=showNav?'':'none';
+}
+function downloadCurrent(){
+  if(!lbMedia.length||!_lbProduct)return;
+  const m=lbMedia[lbIndex];
+  if(m.type!=='image'){toast('影片無法直接儲存');return;}
+  saveImageToAlbum(m.data,_lbProduct.name+'.jpg');
+}
+// 鍵盤快捷鍵
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('lightbox').classList.contains('hidden'))return;
+  if(e.key==='ArrowLeft')lbNav(-1);
+  else if(e.key==='ArrowRight')lbNav(1);
+  else if(e.key==='Escape')closeLightbox();
+});
+// 點擊燈箱背景關閉
+document.getElementById('lightbox').addEventListener('click',function(e){
+  if(e.target===this||e.target.id==='lb-img')closeLightbox();
+});
+// 手機左右滑動：跟隨手指即時位移
+(function(){
+  const lb=document.getElementById('lightbox');
+  const stack=document.getElementById('lb-img-stack');
+  const img1=document.getElementById('lb-img');
+  const img2=document.getElementById('lb-img-2');
+  let startX=0,startY=0,tracking=false,dragging=false,dirNow=0,stackW=0;
+
+  lb.addEventListener('touchstart',function(e){
+    if(e.touches.length!==1)return;
+    startX=e.touches[0].clientX;startY=e.touches[0].clientY;
+    tracking=true;dragging=false;dirNow=0;
+    img1.style.transition='none';img2.style.transition='none';
+  },{passive:true});
+
+  lb.addEventListener('touchmove',function(e){
+    if(!tracking||lbList.length<2)return;
+    const touch=e.touches[0];
+    const dx=touch.clientX-startX;const dy=touch.clientY-startY;
+    if(!dragging){
+      if(Math.abs(dx)<8)return;
+      if(Math.abs(dx)<=Math.abs(dy)*1.5){tracking=false;return;}
+      dragging=true;stackW=stack.getBoundingClientRect().width||1;
+    }
+    e.preventDefault();
+    const dir=dx<0?1:-1; // 1=下一個(向左滑)，-1=上一個(向右滑)
+    if(dir!==dirNow){
+      dirNow=dir;
+      const nextP=lbList[(lbIndex+dir+lbList.length)%lbList.length];
+      img2.src=nextP.imgData;
+      img2.style.transform=`translateX(${dir>0?'100%':'-100%'})`;
+    }
+    img1.style.transform=`translateX(${dx}px)`;
+    const offset=dir>0?stackW+dx:-stackW+dx;
+    img2.style.transform=`translateX(${offset}px)`;
+  },{passive:false});
+
+  lb.addEventListener('touchend',function(e){
+    if(!tracking)return;tracking=false;
+    if(!dragging)return;
+    dragging=false;
+    const touch=e.changedTouches[0];
+    const dx=touch.clientX-startX;
+    img1.style.transition='transform .22s ease';img2.style.transition='transform .22s ease';
+    const threshold=stackW*0.25;
+    if(Math.abs(dx)>threshold&&dirNow!==0){
+      const dir=dirNow;
+      img1.style.transform=`translateX(${dir>0?'-100%':'100%'})`;
+      img2.style.transform='translateX(0)';
+      setTimeout(()=>{
+        lbIndex=(lbIndex+dir+lbList.length)%lbList.length;
+        renderLightbox();
+        img1.style.transition='none';img2.style.transition='none';
+        img1.style.transform='translateX(0)';
+        img2.style.transform='translateX(100%)';
+      },220);
+    }else{
+      img1.style.transform='translateX(0)';
+      img2.style.transform=`translateX(${dirNow>0?'100%':'-100%'})`;
+    }
+  },{passive:true});
+})();
+
+/* ── 登入 ── */
+function doLogin(){
+  if(document.getElementById('pw').value===ADMIN_PW){
+    adminUnlocked=true;
+    document.getElementById('login-wrap').classList.add('hidden');
+    document.getElementById('admin-content').classList.remove('hidden');
+    renderPmgmt();renderCatList();
+  }else{
+    document.getElementById('pw-err').textContent='密碼錯誤，請再試一次';
+    document.getElementById('pw').value='';
+  }
+}
+
+/* ── 商品管理 ── */
+function renderPmgmt(){
+  const el=document.getElementById('pmgmt-list');
+  const fCat=document.getElementById('pm-filter-cat')?.value||'';
+  const fStatus=document.getElementById('pm-filter-status')?.value||'';
+  const fSearch=document.getElementById('pm-search')?.value.trim().toLowerCase()||'';
+  let list=[...products];
+  if(fCat)list=list.filter(p=>String(p.catId)===fCat);
+  if(fStatus==='1')list=list.filter(p=>p.online);
+  if(fStatus==='0')list=list.filter(p=>!p.online);
+  if(fSearch)list=list.filter(p=>p.name.toLowerCase().includes(fSearch));
+  if(!list.length){el.innerHTML='<div class="empty">無符合商品</div>';return;}
+  el.innerHTML=list.map(p=>{
+    const cat=getCat(p.catId);
+    const priceStr=p.price?`NT$${Number(p.price).toLocaleString()}`:'詢問闆娘';
+    return`<div class="pmcard${p.online?'':' offline'}">
+      <input type="checkbox" class="pmcheck" ${selectedPids.has(p.id)?'checked':''} onchange="toggleSelect(${p.id},this.checked)"/>
+      <div class="pmthumb">${p.imgData?`<img src="${p.imgData}" alt="${p.name}">`:'🛍️'}</div>
+      <div class="pminfo">
+        <div class="pmname">${p.name}${!p.online?'<span class="tag tag-off">下架</span>':''}</div>
+        <div class="pmsub">${priceStr}${cat?' · '+cat.emoji+cat.name:''}${p.note?' · '+p.note:''}</div>
+      </div>
+      <div class="pm-actions">
+        <button class="icon-btn" onclick="toggleOnline(${p.id})" title="${p.online?'下架':'上架'}">${p.online?'🔴':'🟢'}</button>
+        <button class="icon-btn" onclick="openPForm(${p.id})" title="編輯">✏️</button>
+        <button class="icon-btn del" onclick="deleteProduct(${p.id})" title="刪除">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+  updateBatchBar();
+}
+
+function toggleSelect(pid,checked){
+  if(checked)selectedPids.add(pid);else selectedPids.delete(pid);
+  updateBatchBar();
+}
+function updateBatchBar(){
+  const n=selectedPids.size;
+  document.getElementById('batch-bar').classList.toggle('hidden',n===0);
+  document.getElementById('batch-count').textContent=`已選 ${n} 筆`;
+}
+
+// 全選（依目前篩選結果）
+function batchSelectAll(){
+  const fCat=document.getElementById('pm-filter-cat')?.value||'';
+  const fStatus=document.getElementById('pm-filter-status')?.value||'';
+  const fSearch=document.getElementById('pm-search')?.value.trim().toLowerCase()||'';
+  let list=[...products];
+  if(fCat)list=list.filter(p=>String(p.catId)===fCat);
+  if(fStatus==='1')list=list.filter(p=>p.online);
+  if(fStatus==='0')list=list.filter(p=>!p.online);
+  if(fSearch)list=list.filter(p=>p.name.toLowerCase().includes(fSearch));
+  list.forEach(p=>selectedPids.add(p.id));
+  renderPmgmt();
+}
+function batchDeselectAll(){selectedPids.clear();renderPmgmt();}
+
+async function batchOnline(val){
+  if(!selectedPids.size)return;
+  const ids=[...selectedPids];
+  const{error}=await SB.from('browse_products').update({online:val}).in('id',ids);
+  if(error){toast('操作失敗');return;}
+  ids.forEach(id=>{const p=getProd(id);if(p)p.online=val;});
+  selectedPids.clear();renderPmgmt();renderProducts();renderCatBar();
+  toast(`已${val?'上架':'下架'} ${ids.length} 筆`);
+}
+
+async function batchDelete(){
+  if(!selectedPids.size)return;
+  if(!confirm(`確定刪除選取的 ${selectedPids.size} 筆商品？`))return;
+  const ids=[...selectedPids];
+  const{error}=await SB.from('browse_products').delete().in('id',ids);
+  if(error){toast('刪除失敗');return;}
+  products=products.filter(p=>!ids.includes(p.id));
+  selectedPids.clear();renderPmgmt();renderProducts();renderCatBar();
+  toast(`已刪除 ${ids.length} 筆`);
+}
+
+async function batchChangeCat(){
+  if(!selectedPids.size){toast('請先勾選商品');return;}
+  const catId=document.getElementById('batch-cat-select').value;
+  const ids=[...selectedPids];
+  const payload={cat_id:catId?Number(catId):null};
+  const{error}=await SB.from('browse_products').update(payload).in('id',ids);
+  if(error){toast('修改失敗');return;}
+  ids.forEach(id=>{const p=getProd(id);if(p)p.catId=catId?Number(catId):null;});
+  selectedPids.clear();renderPmgmt();renderProducts();renderCatBar();
+  const catName=catId?getCat(Number(catId))?.name||'':'無分類';
+  toast(`已將 ${ids.length} 筆改為「${catName}」`);
+}
+
+async function toggleOnline(pid){
+  const p=getProd(pid);if(!p)return;
+  p.online=!p.online;
+  await SB.from('browse_products').update({online:p.online}).eq('id',pid);
+  renderPmgmt();renderProducts();renderCatBar();
+  toast(p.online?'商品已上架':'商品已下架');
+}
+async function deleteProduct(pid){
+  if(!confirm('確定刪除此商品？'))return;
+  const{error}=await SB.from('browse_products').delete().eq('id',pid);
+  if(error){toast('刪除失敗');return;}
+  products=products.filter(p=>p.id!==pid);
+  selectedPids.delete(pid);
+  renderPmgmt();renderProducts();renderCatBar();
+  toast('已刪除');
+}
+
+/* ── 商品表單 ── */
+function openPForm(pid){
+  editingPid=pid;pendingImg=null;
+  document.getElementById('pform-title').textContent=pid?'修改商品':'新增商品';
+  const prevWrap=document.getElementById('img-preview-wrap');
+  const ph=document.getElementById('img-placeholder');
+  document.getElementById('img-file').value='';
+  document.getElementById('f-cat').innerHTML='<option value="">不分類</option>'+categories.map(c=>`<option value="${c.id}">${c.emoji||''}${c.name}</option>`).join('');
+  if(pid){
+    const p=getProd(pid);
+    document.getElementById('f-name').value=p.name;
+    document.getElementById('f-price').value=p.price||'';
+    document.getElementById('f-cat').value=p.catId||'';
+    document.getElementById('f-note').value=p.note||'';
+    document.getElementById('f-online').checked=p.online!==false;
+    if(p.imgData){document.getElementById('img-prev').src=p.imgData;prevWrap.classList.remove('hidden');ph.classList.add('hidden');}
+    else{prevWrap.classList.add('hidden');ph.classList.remove('hidden');}
+  }else{
+    ['f-name','f-price','f-note'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('f-cat').value='';
+    document.getElementById('f-online').checked=true;
+    prevWrap.classList.add('hidden');ph.classList.remove('hidden');
+  }
+  document.getElementById('pform-ov').classList.remove('hidden');
+}
+function closePForm(){document.getElementById('pform-ov').classList.add('hidden');}
+
+function clearImg(){
+  pendingImg='__clear__';
+  document.getElementById('img-preview-wrap').classList.add('hidden');
+  document.getElementById('img-placeholder').classList.remove('hidden');
+}
+function handleImg(e){
+  const f=e.target.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=900;
+      let{width:w,height:h}=img;
+      if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
+      const canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      pendingImg=canvas.toDataURL('image/jpeg',0.82);
+      document.getElementById('img-prev').src=pendingImg;
+      document.getElementById('img-preview-wrap').classList.remove('hidden');
+      document.getElementById('img-placeholder').classList.add('hidden');
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(f);
+}
+
+async function saveProduct(){
+  const name=document.getElementById('f-name').value.trim();
+  const priceRaw=document.getElementById('f-price').value.trim();
+  const price=priceRaw?parseInt(priceRaw):null;
+  const catId=document.getElementById('f-cat').value||null;
+  const note=document.getElementById('f-note').value.trim();
+  const online=document.getElementById('f-online').checked;
+  if(!name){toast('請輸入商品名稱');return;}
+  let imgData=editingPid?getProd(editingPid)?.imgData||null:null;
+  if(pendingImg==='__clear__')imgData=null;
+  else if(pendingImg)imgData=pendingImg;
+  const payload={name,price,cat_id:catId?Number(catId):null,note,online,img_data:imgData};
+  if(editingPid){
+    const{error}=await SB.from('browse_products').update(payload).eq('id',editingPid);
+    if(error){toast('儲存失敗：'+error.message);return;}
+    const p=getProd(editingPid);
+    Object.assign(p,{name,price,catId:catId?Number(catId):null,note,online,imgData});
+  }else{
+    const{data,error}=await SB.from('browse_products').insert([payload]).select().single();
+    if(error){toast('新增失敗：'+error.message);return;}
+    products.push({id:data.id,name,price,catId:catId?Number(catId):null,note,online,imgData});
+  }
+  closePForm();renderPmgmt();renderProducts();renderCatBar();
+  toast(editingPid?'商品已更新':'商品已新增');
+}
+
+/* ── 分類管理 ── */
+function renderCatList(){
+  const el=document.getElementById('cat-list');
+  if(!categories.length){el.innerHTML='<div class="empty">尚無分類，請新增 🏷️</div>';return;}
+  el.innerHTML=categories.map(c=>{
+    const count=products.filter(p=>String(p.catId)===String(c.id)).length;
+    return`<div class="store-card">
+      <div class="store-icon">${c.emoji||'🏷️'}</div>
+      <div class="store-info">
+        <div class="store-name">${c.name}</div>
+        <div class="store-sub">${count} 件商品</div>
+      </div>
+      <div style="display:flex;gap:5px">
+        <button class="icon-btn" onclick="openCatForm(${c.id})">✏️</button>
+        <button class="icon-btn del" onclick="deleteCat(${c.id})">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function openCatForm(cid){
+  editingCid=cid;
+  document.getElementById('cform-title').textContent=cid?'修改分類':'新增分類';
+  if(cid){const c=categories.find(x=>x.id===cid);document.getElementById('cf-name').value=c.name;document.getElementById('cf-emoji').value=c.emoji||'';}
+  else{document.getElementById('cf-name').value='';document.getElementById('cf-emoji').value='';}
+  document.getElementById('cform-ov').classList.remove('hidden');
+}
+function closeCatForm(){document.getElementById('cform-ov').classList.add('hidden');}
+
+async function saveCat(){
+  const name=document.getElementById('cf-name').value.trim();
+  const emoji=document.getElementById('cf-emoji').value.trim();
+  if(!name){toast('請輸入分類名稱');return;}
+  if(editingCid){
+    const{error}=await SB.from('categories').update({name,emoji}).eq('id',editingCid);
+    if(error){toast('儲存失敗');return;}
+    const c=categories.find(x=>x.id===editingCid);if(c){c.name=name;c.emoji=emoji;}
+  }else{
+    const{data,error}=await SB.from('categories').insert([{name,emoji}]).select().single();
+    if(error){toast('新增失敗');return;}
+    categories.push({id:data.id,name,emoji});
+  }
+  closeCatForm();refreshCatSelects();renderCatBar();renderProducts();
+  toast(editingCid?'分類已更新':'分類已新增');
+}
+async function deleteCat(cid){
+  const count=products.filter(p=>String(p.catId)===String(cid)).length;
+  if(count>0){toast(`此分類有 ${count} 件商品，請先移除商品`);return;}
+  if(!confirm('確定刪除此分類？'))return;
+  const{error}=await SB.from('categories').delete().eq('id',cid);
+  if(error){toast('刪除失敗');return;}
+  categories=categories.filter(c=>c.id!==cid);
+  refreshCatSelects();renderCatBar();
+  toast('分類已刪除');
+}
+
+/* ── 快速關鍵字管理 ── */
+function renderQkList(){
+  const el=document.getElementById('qk-list');
+  if(!quickKeywords.length){el.innerHTML='<div class="empty">尚無快速關鍵字，請新增 🔑</div>';return;}
+  el.innerHTML=quickKeywords.map(k=>`<div class="store-card">
+      <div class="store-icon">🔑</div>
+      <div class="store-info">
+        <div class="store-name">${k.label}</div>
+        <div class="store-sub">搜尋關鍵字：${k.keyword}</div>
+      </div>
+      <div style="display:flex;gap:5px">
+        <button class="icon-btn" onclick="openQkForm(${k.id})">✏️</button>
+        <button class="icon-btn del" onclick="deleteQk(${k.id})">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+function openQkForm(qid){
+  editingQid=qid;
+  document.getElementById('qform-title').textContent=qid?'修改關鍵字':'新增關鍵字';
+  if(qid){const k=quickKeywords.find(x=>x.id===qid);document.getElementById('qf-label').value=k.label;document.getElementById('qf-keyword').value=k.keyword;}
+  else{document.getElementById('qf-label').value='';document.getElementById('qf-keyword').value='';}
+  document.getElementById('qform-ov').classList.remove('hidden');
+}
+function closeQkForm(){document.getElementById('qform-ov').classList.add('hidden');}
+async function saveQk(){
+  const label=document.getElementById('qf-label').value.trim();
+  const keyword=document.getElementById('qf-keyword').value.trim();
+  if(!label||!keyword){toast('請輸入顯示文字與關鍵字');return;}
+  if(editingQid){
+    const{error}=await SB.from('quick_keywords').update({label,keyword}).eq('id',editingQid);
+    if(error){toast('儲存失敗：'+error.message);return;}
+    const k=quickKeywords.find(x=>x.id===editingQid);if(k){k.label=label;k.keyword=keyword;}
+  }else{
+    const{data,error}=await SB.from('quick_keywords').insert([{label,keyword}]).select().single();
+    if(error){toast('新增失敗：'+error.message);return;}
+    quickKeywords.push({id:data.id,label,keyword});
+  }
+  closeQkForm();renderQkList();renderQkBar();
+  toast(editingQid?'關鍵字已更新':'關鍵字已新增');
+}
+async function deleteQk(qid){
+  if(!confirm('確定刪除此快速關鍵字？'))return;
+  const{error}=await SB.from('quick_keywords').delete().eq('id',qid);
+  if(error){toast('刪除失敗');return;}
+  quickKeywords=quickKeywords.filter(k=>k.id!==qid);
+  renderQkList();renderQkBar();
+  toast('關鍵字已刪除');
+}
+
+async function saveAnnouncement(){
+  const val=document.getElementById('announce-input').value;
+  const{error}=await SB.from('site_settings').upsert({key:'announcement',value:val});
+  if(error){toast('儲存失敗：'+error.message);return;}
+  announceText=val;
+  renderAnnouncement();
+  toast('公告已更新');
+}
+
+/* ── Init ── */
+(async()=>{
+  await loadCategories();
+  await loadProducts();
+  await loadQuickKeywords();
+  await loadAnnouncement();
+})();
+</script>
+</body>
+</html>
